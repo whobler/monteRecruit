@@ -25,4 +25,4 @@ class Seats(models.Model):
     ]
     type = models.CharField(choices=SEATS_TYPE_CHOICES, max_length=3, default=REGULAR, null=False)
     event = models.ForeignKey(Events, on_delete=models.CASCADE, null=False)
-    reservation = models.ForeignKey(Reservations, on_delete=models.CASCADE)
+    reservation = models.ForeignKey(Reservations, on_delete=models.CASCADE, null=True, blank=True)
