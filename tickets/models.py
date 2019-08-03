@@ -15,10 +15,14 @@ class Reservations(models.Model):
 
 class Seats(models.Model):
     """Seats model. There can be multiple Seats for each Event. A Reservation can reference many Seats."""
-    REGULAR = 'Regular'
-    PREMIUM = 'Premium'
+    REGULAR = 'Rr'
+    PREMIUM = 'Pm'
     VIP = 'VIP'
-    SEATS_TYPE_CHOICES = [REGULAR, PREMIUM, VIP]
-    type = models.CharField(choices=SEATS_TYPE_CHOICES, default=REGULAR, null=False)
+    SEATS_TYPE_CHOICES = [
+        (REGULAR, 'Regular'),
+        (PREMIUM, 'Premium'),
+        (VIP, 'VIP')
+    ]
+    type = models.CharField(choices=SEATS_TYPE_CHOICES, max_length=3, default=REGULAR, null=False)
     event = models.ForeignKey(Events, on_delete=models.CASCADE, null=False)
     reservation = models.ForeignKey(Reservations, on_delete=models.CASCADE)

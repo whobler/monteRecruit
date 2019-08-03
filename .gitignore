@@ -33,3 +33,5 @@ venv.bak/
 
 # Project specific
 monteWH/__pycache__/
+tickets/__pycache__/
+tickets/migrations/
