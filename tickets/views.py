@@ -25,8 +25,11 @@ class ReserveTicketView(APIView):
         new_reservation.save()
         for seat_id in seat_ids.split(','):
             current_seat = Seats.objects.get(id=seat_id)
-            current_seat.reservation = new_reservation
-            current_seat.save()
+            if current_seat.reservation is None:
+                current_seat.reservation = new_reservation
+                current_seat.save()
+            else:
+                return Response("Ticket(s) already reserved")
         return Response(new_reservation.pk)
 
 
@@ -34,11 +37,11 @@ class PayView(APIView):
     # This should be a POST method. It is a GET method only for proof of concept and convenience.
     def get(self, request, reservation_id, amount, token, currency):
         try:
-            p = PaymentGateway()
-            p.charge(amount, token, currency)
+            pg = PaymentGateway()
+            pg.charge(amount, token, currency)
         except (CardError, PaymentError, CurrencyError) as e:
             return Response(str(e))  # this should be transformed into a JSON object for consistency
         reservation = Reservations.objects.get(id=reservation_id)
         reservation.is_payed = True
         reservation.save()
-        return Response('bbb')
+        return Response(reservation.pk)
