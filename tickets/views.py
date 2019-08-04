@@ -2,6 +2,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.core import serializers
 
+from .payment_adapter import PaymentGateway, CardError, PaymentError, CurrencyError
 from .models import Events, Seats, Reservations
 
 
@@ -18,7 +19,7 @@ class AvailableTicketsView(APIView):
 
 
 class ReserveTicketView(APIView):
-    # This should be a POST method. It is a GET method only for proof of concept.
+    # This should be a POST method. It is a GET method only for proof of concept and convenience.
     def get(self, request, seat_ids):
         new_reservation = Reservations()
         new_reservation.save()
@@ -30,5 +31,14 @@ class ReserveTicketView(APIView):
 
 
 class PayView(APIView):
-    def get(self, request, reservation_id):
+    # This should be a POST method. It is a GET method only for proof of concept and convenience.
+    def get(self, request, reservation_id, amount, token, currency):
+        try:
+            p = PaymentGateway()
+            p.charge(amount, token, currency)
+        except (CardError, PaymentError, CurrencyError) as e:
+            return Response(str(e))  # this should be transformed into a JSON object for consistency
+        reservation = Reservations.objects.get(id=reservation_id)
+        reservation.is_payed = True
+        reservation.save()
         return Response('bbb')
