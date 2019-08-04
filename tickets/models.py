@@ -8,13 +8,13 @@ class Events(models.Model):
 
 
 class Reservations(models.Model):
-    """Reservations model. There can be multiple Reservations for an Event."""
+    """Reservations model. There can be multiple Reservations for an Event. A Reservation can reference many Seats."""
     is_payed = models.BooleanField(default=False)
     reservation_time = models.DateTimeField(auto_now=True)
 
 
 class Seats(models.Model):
-    """Seats model. There can be multiple Seats for each Event. A Reservation can reference many Seats."""
+    """Seats model. There can be multiple Seats for each Event."""
     REGULAR = 'Rr'
     PREMIUM = 'Pm'
     VIP = 'VIP'
