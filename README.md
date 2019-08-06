@@ -47,7 +47,8 @@ All endpoints return a JSON object for easy use with front-end.
 The format and details can be easily changed.
 
 Future improvements could include (but not limited to):
-*rate limiting 
-*usind UUID instead of ID's
-*more useful statistics (like histograms)
-*more tests to ensure quality
+
+1. rate limiting
+2. using UUID instead of ID's
+3. more useful statistics (like histograms)
+4. more tests to ensure quality
