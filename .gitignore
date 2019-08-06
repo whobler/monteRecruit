@@ -35,3 +35,4 @@ venv.bak/
 monteWH/__pycache__/
 tickets/__pycache__/
 tickets/migrations/
+__pycache__/
