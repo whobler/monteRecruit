@@ -6,9 +6,10 @@ from .payment_adapter import PaymentGateway, CardError, PaymentError, CurrencyEr
 from .models import Events, Seats, Reservations
 
 
-NO_EVENT_FOUND_MESSAGE = "No event found."
-NO_TICKETS_FOR_EVENT_MESSAGE = "No available tickets found for this event."
+NO_EVENT_FOUND_MESSAGE = 'No event found.'
 NO_TICKET_FOUND_MESSAGE = 'One or more tickets do not exist'
+NO_RESERVATION_FOUND_MESSAGE = 'No reservation found.'
+NO_TICKETS_FOR_EVENT_MESSAGE = "No available tickets found for this event."
 TICKET_ALREADY_RESERVED_MESSAGE = 'One or more tickets already reserved.'
 
 
@@ -56,21 +57,25 @@ class ReserveTicketView(APIView):
                 current_seat.save()
             else:
                 return JsonResponse({'error': TICKET_ALREADY_RESERVED_MESSAGE})
-        return JsonResponse({'new_reservation': new_reservation.pk})
+        return JsonResponse({'new_reservation_id': new_reservation.pk})
 
 
 class PayView(APIView):
     # This should be a POST method. It is a GET method only for proof of concept and convenience.
     def get(self, request, reservation_id, amount, token, currency):
-        try:
-            pg = PaymentGateway()
-            pg.charge(amount, token, currency)
-        except (CardError, PaymentError, CurrencyError) as e:
-            return Response(str(e))
         reservation = Reservations.objects.get(id=reservation_id)
-        reservation.is_payed = True
-        reservation.save()
-        return Response(reservation.pk)
+        if reservation:
+            try:
+                pg = PaymentGateway()
+                pg.charge(amount, token, currency)
+            except (CardError, PaymentError, CurrencyError) as e:
+                return JsonResponse({'errors': str(e)})
+            reservation.is_payed = True
+            reservation.save()
+            data = {'info': 'payment for reservation ' + reservation.id + ' successful'}
+        else:
+            data = {'error': NO_RESERVATION_FOUND_MESSAGE}
+        return JsonResponse(data)
 
 
 class ReservationView(APIView):

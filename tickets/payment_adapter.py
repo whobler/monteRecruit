@@ -25,6 +25,6 @@ class PaymentGateway:
         elif token == 'payment_error':
             raise PaymentError("Something went wrong with your transaction")
         elif currency not in self.supported_currencies:
-            raise CurrencyError("Currency {currency} not supported")
+            raise CurrencyError("Currency {} not supported".format(currency))
         else:
             return PaymentResult(amount, currency)
