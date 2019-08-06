@@ -4,7 +4,7 @@ from django.db import models
 class Events(models.Model):
     """Events model."""
     name = models.CharField(max_length=90, null=False)
-    datetime = models.DateTimeField(auto_now=True)
+    datetime = models.DateTimeField(null=False)
 
 
 class Reservations(models.Model):
