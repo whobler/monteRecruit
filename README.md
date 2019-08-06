@@ -46,7 +46,7 @@ It is done for simplicity and as a proof of concept.
 All endpoints return a JSON object for easy use with front-end.
 The format and details can be easily changed.
 
-Future improvements could include (but not limited to):
+Future improvements could include (but are not limited to):
 
 1. rate limiting
 2. using UUID instead of ID's

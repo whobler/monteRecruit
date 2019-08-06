@@ -1,5 +1,3 @@
-from datetime import datetime, timezone
-
 from django.http import JsonResponse
 from rest_framework.views import APIView
 
@@ -18,6 +16,7 @@ PAYMENT_SUCCESSFUL_MESSAGE = 'Payment for reservation {} successful.'
 
 class EventView(APIView):
     def get(self, request, event_id):
+        """Endpoint for getting more detailed information about a single event."""
         event = Events.objects.filter(pk=event_id).first()
         if event:
             data = {
@@ -32,6 +31,7 @@ class EventView(APIView):
 
 class AvailableTicketsView(APIView):
     def get(self, request, event_id):
+        """Endpoint for checking all available(not reserved) tickets for a single event."""
         event = Events.objects.filter(pk=event_id).first()
         if event:
             available_tickets = Seats.objects.filter(reservation=None, event=event)
@@ -49,6 +49,7 @@ class AvailableTicketsView(APIView):
 class ReserveTicketView(APIView):
     # This should be a POST method. It is a GET method only for proof of concept and convenience.
     def get(self, request, seat_ids):
+        """Endpoint for reserving ticket(s). Multiple tickets can be reserved at once."""
         new_reservation = Reservations()
         new_reservation.save()
         for seat_id in seat_ids.split(','):
@@ -66,6 +67,17 @@ class ReserveTicketView(APIView):
 class PayView(APIView):
     # This should be a POST method. It is a GET method only for proof of concept and convenience.
     def get(self, request, reservation_id, amount, token, currency):
+        """
+        Endpoint for payment purposes.
+        Notes:
+            -'amount' can be any integer number (probably should a float in a completed application)
+            -'token' can be almost anything (see payment_adapter.py for details)
+            -'currency' can be only 'EUR' at the moment (see payment_adapter.py for details)
+            anything else will resolve in an error (most of them are caught).
+
+        Also, there is probably a better way to send these information to this endpoint.
+        In the URL it does not seem secure. Pardon my Django incompetence :)
+        """
         reservation = Reservations.objects.get(id=reservation_id)
         if reservation:
             if reservation.is_payed is True:
@@ -86,6 +98,7 @@ class PayView(APIView):
 
 class ReservationView(APIView):
     def get(self, request, reservation_id):
+        """Endpoint for getting detailed information about a single reservation."""
         reservation = Reservations.objects.filter(id=reservation_id).first()
         if reservation:
             reserved_seats = Seats.objects.filter(reservation=reservation)
@@ -103,6 +116,12 @@ class ReservationView(APIView):
 
 class StatisticsView(APIView):
     def get(self, request, statistics_type):
+        """
+        Endpoint for getting statistics.
+        Currently implemented statistics:
+        -reserved_tickets_per_event returns amount of reserved tickets per event
+        -reserved_tickets_by_type returns amount of reserved tickets per type
+        """
         data = {}
         if statistics_type == "reserved_tickets_per_event":
             for event in Events.objects.all():
