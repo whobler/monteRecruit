@@ -6,10 +6,12 @@ from .models import Events, Seats, Reservations
 
 
 NO_EVENT_FOUND_MESSAGE = 'No event found.'
-NO_TICKET_FOUND_MESSAGE = 'One or more tickets do not exist'
+NO_TICKET_FOUND_MESSAGE = 'One or more tickets do not exist.'
 NO_RESERVATION_FOUND_MESSAGE = 'No reservation found.'
 NO_TICKETS_FOR_EVENT_MESSAGE = "No available tickets found for this event."
 TICKET_ALREADY_RESERVED_MESSAGE = 'One or more tickets already reserved.'
+RESERVATION_ALREADY_PAID_MESSAGE = "Reservation already paid for."
+PAYMENT_SUCCESSFUL_MESSAGE = 'Payment for reservation {} successful.'
 
 
 class EventView(APIView):
@@ -64,14 +66,17 @@ class PayView(APIView):
     def get(self, request, reservation_id, amount, token, currency):
         reservation = Reservations.objects.get(id=reservation_id)
         if reservation:
-            try:
-                pg = PaymentGateway()
-                pg.charge(amount, token, currency)
-            except (CardError, PaymentError, CurrencyError) as e:
-                return JsonResponse({'errors': str(e)})
-            reservation.is_payed = True
-            reservation.save()
-            data = {'info': 'payment for reservation ' + reservation.id + ' successful'}
+            if reservation.is_payed is True:
+                data = {'error': RESERVATION_ALREADY_PAID_MESSAGE}
+            else:
+                try:
+                    pg = PaymentGateway()
+                    pg.charge(amount, token, currency)
+                except (CardError, PaymentError, CurrencyError) as e:
+                    return JsonResponse({'errors': str(e)})
+                reservation.is_payed = True
+                reservation.save()
+                data = {'info': PAYMENT_SUCCESSFUL_MESSAGE.format(reservation_id)}
         else:
             data = {'error': NO_RESERVATION_FOUND_MESSAGE}
         return JsonResponse(data)
@@ -89,6 +94,6 @@ class ReservationView(APIView):
                 'is_payed': reservation.is_payed,
                 'reserved_seats': seat_ids,
             }
-            return JsonResponse(data)
         else:
-            return JsonResponse({'errors': "No reservation found."})
+            data = {'errors': NO_RESERVATION_FOUND_MESSAGE}
+        return JsonResponse(data)
