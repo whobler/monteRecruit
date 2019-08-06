@@ -1,4 +1,7 @@
-# monteRecruit
+# Wojciech Hobler recruitment task
+
+This project provides API endpoints for possible front-end use to a ticket-selling platform. 
+It is very simplified and should be only used to assess Python writing skills.
 
 This project uses django-cron to periodically erase outdated Reservations.
 In order to make it work automatically a proper job should be added to crontab.
