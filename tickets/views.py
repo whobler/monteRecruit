@@ -97,3 +97,17 @@ class ReservationView(APIView):
         else:
             data = {'errors': NO_RESERVATION_FOUND_MESSAGE}
         return JsonResponse(data)
+
+
+class StatisticsView(APIView):
+    def get(self, request, statistics_type):
+        data = {}
+        if statistics_type == "reserved_tickets_per_event":
+            for event in Events.objects.all():
+                data[event.name] = event.seats_set.filter(reservation__isnull=False).count()
+        elif statistics_type == "reserved_tickets_by_type":
+            for seat_type in Seats.SEATS_TYPE_CHOICES:
+                data[seat_type[1]] = Seats.objects.filter(type=seat_type[0], reservation__isnull=False).count()
+        return JsonResponse(data)
+
+        # statistic idea: histogram of how many reservations were made per day

@@ -9,4 +9,5 @@ urlpatterns = [
     path('pay/<int:reservation_id>/<int:amount>/<str:token>/<str:currency>',
          views.PayView.as_view(), name='PayView'),
     path('reservations/<int:reservation_id>/', views.ReservationView.as_view(), name='ReservationView'),
+    path('statistics/<str:statistics_type>/', views.StatisticsView.as_view(), name='StatisticsView'),
 ]
