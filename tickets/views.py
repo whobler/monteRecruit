@@ -1,3 +1,4 @@
+from django.http import JsonResponse
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.core import serializers
@@ -40,8 +41,25 @@ class PayView(APIView):
             pg = PaymentGateway()
             pg.charge(amount, token, currency)
         except (CardError, PaymentError, CurrencyError) as e:
-            return Response(str(e))  # this should be transformed into a JSON object for consistency
+            return Response(str(e))
         reservation = Reservations.objects.get(id=reservation_id)
         reservation.is_payed = True
         reservation.save()
         return Response(reservation.pk)
+
+
+class ReservationView(APIView):
+    def get(self, request, reservation_id):
+        reservation = Reservations.objects.filter(id=reservation_id).first()
+        if reservation:
+            reserved_seats = Seats.objects.filter(reservation=reservation)
+            seat_ids = [seat.id for seat in reserved_seats]
+            data = {
+                'reservation_id': reservation.pk,
+                'reservation_time': reservation.reservation_time,
+                'is_payed': reservation.is_payed,
+                'reserved_seats': seat_ids,
+            }
+            return JsonResponse(data)
+        else:
+            return JsonResponse({'errors': "No reservation found."})
