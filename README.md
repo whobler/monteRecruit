@@ -42,3 +42,12 @@ or
 At the moment all the API endpoints use GET method. 
 Some of them should use POST in a final application.
 It is done for simplicity and as a proof of concept.
+
+All endpoints return a JSON object for easy use with front-end.
+The format and details can be easily changed.
+
+Future improvements could include (but not limited to):
+*rate limiting 
+*usind UUID instead of ID's
+*more useful statistics (like histograms)
+*more tests to ensure quality
