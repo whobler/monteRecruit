@@ -1,7 +1,12 @@
 from django.urls import reverse
 from rest_framework.test import APITestCase
 
-from .views import NO_EVENT_FOUND_MESSAGE, NO_TICKETS_FOR_EVENT_MESSAGE
+from .views import (
+    NO_EVENT_FOUND_MESSAGE,
+    NO_TICKETS_FOR_EVENT_MESSAGE,
+    TICKET_ALREADY_RESERVED_MESSAGE,
+    NO_TICKET_FOUND_MESSAGE
+)
 from .models import Events, Reservations, Seats
 
 
@@ -68,6 +73,8 @@ class AvailableTicketsViewTest(APITestCase):
 
 
 class ReserveTicketViewTest(APITestCase):
+    url = reverse('reserve_ticket_view')
+
     def setUp(self):
         event = Events.objects.create(name=event_name, datetime=some_datetime)
         Seats.objects.create(type=1, event=event)
@@ -75,15 +82,25 @@ class ReserveTicketViewTest(APITestCase):
 
     def test_ok(self):
         """Check if endpoint returns proper response."""
-        url = reverse('reserve_ticket_view')
-        response = self.client.post(url, {'seat_ids': "2,1"}, format='json')
+        response = self.client.post(self.url, {'seat_ids': "2,1"}, format='json')
 
         self.assertEqual(response.status_code, 200)
         expected_response = {'new_reservation_id': 1}
         assert expected_response == response.json()
         self.assertEqual(Reservations.objects.all().count(), 1)
 
-    # def test_already_reserved(self):
-    #     """Check if tickets do not get reserved if is already reserved."""
-    #     url = reverse('reserve_ticket_view', kwargs={'seat_ids': "2,1"})
-    #     response = self.client.get(url, {}, format='json')
+    def test_already_reserved(self):
+        """Check if tickets do not get reserved if one is already reserved."""
+        seat_1 = Seats.objects.get(id=1)
+        reservation = Reservations.objects.create()
+        seat_1.reservation = reservation
+        seat_1.save()
+        response = self.client.post(self.url, {'seat_ids': "1,2"}, format='json')
+
+        self.assertContains(response, TICKET_ALREADY_RESERVED_MESSAGE, status_code=200)
+        self.assertEqual(Seats.objects.get(id=2).reservation, None)
+
+    def test_ticket_not_existing(self):
+        """Check if endpoint returns proper response when not existing tickets given"""
+        response = self.client.post(self.url, {'seat_ids': "10,15"}, format='json')
+        self.assertContains(response, NO_TICKET_FOUND_MESSAGE, status_code=200)
