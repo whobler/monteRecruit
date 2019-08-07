@@ -34,7 +34,7 @@ method: `POST`
 
 parameters: `reservation_id`, `amount`, `token`, `currency`
 
-example: `/tickets/pay/1/10/1/EUR`
+example: `/tickets/pay/`
 
 
 ### /tickets/reservations/RESERVATION_ID
