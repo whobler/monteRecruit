@@ -48,37 +48,31 @@ class ReserveTicketView(APIView):
         """Endpoint for reserving ticket(s). Multiple tickets can be reserved at once."""
         new_reservation = Reservations()
         new_reservation.save()
-        seat_ids = request.data['seat_ids']
+        seat_ids = request.data.get('seat_ids')
         for seat_id in seat_ids.split(','):
             current_seat = Seats.objects.filter(id=seat_id).first()
             if not current_seat:
-                return JsonResponse({'error': NO_TICKET_FOUND_MESSAGE})
+                return JsonResponse({'errors': NO_TICKET_FOUND_MESSAGE})
             if current_seat.reservation is None:
                 current_seat.reservation = new_reservation
                 current_seat.save()
             else:
-                return JsonResponse({'error': TICKET_ALREADY_RESERVED_MESSAGE})
+                return JsonResponse({'errors': TICKET_ALREADY_RESERVED_MESSAGE})
         return JsonResponse({'new_reservation_id': new_reservation.pk})
 
 
 class PayView(APIView):
-    # This should be a POST method. It is a GET method only for proof of concept and convenience.
-    def get(self, request, reservation_id, amount, token, currency):
-        """
-        Endpoint for payment purposes.
-        Notes:
-            -'amount' can be any integer number (probably should a float in a completed application)
-            -'token' can be almost anything (see payment_adapter.py for details)
-            -'currency' can be only 'EUR' at the moment (see payment_adapter.py for details)
-            anything else will resolve in an error (most of them are caught).
+    def post(self, request):
+        """Endpoint for payment purposes."""
+        reservation_id = request.data.get('reservation_id')
+        amount = request.data.get('amount')
+        token = request.data.get('token')
+        currency = request.data.get('currency')
 
-        Also, there is probably a better way to send these information to this endpoint.
-        In the URL it does not seem secure. Pardon my Django incompetence :)
-        """
-        reservation = Reservations.objects.get(id=reservation_id)
+        reservation = Reservations.objects.filter(id=reservation_id).first()
         if reservation:
             if reservation.is_payed is True:
-                data = {'error': RESERVATION_ALREADY_PAID_MESSAGE}
+                data = {'errors': RESERVATION_ALREADY_PAID_MESSAGE}
             else:
                 try:
                     pg = PaymentGateway()
@@ -89,7 +83,7 @@ class PayView(APIView):
                 reservation.save()
                 data = {'info': PAYMENT_SUCCESSFUL_MESSAGE.format(reservation_id)}
         else:
-            data = {'error': NO_RESERVATION_FOUND_MESSAGE}
+            data = {'errors': NO_RESERVATION_FOUND_MESSAGE}
         return JsonResponse(data)
 
 

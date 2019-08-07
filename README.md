@@ -10,27 +10,34 @@ Otherwise it can be run manually by `./manage.py runcrons` command
 
 available URL's to use:
 ### /tickets/events/EVENT_ID
-example: `/tickets/events/1)`
+method: `GET`
+example: `/tickets/events/1`
 
 
 ### /tickets/events/EVENT_ID/available_tickets
+method: `GET`
 example: `/tickets/events/1/available_tickets`
 
 
-### /tickets/reserve_ticket/TICKET_IDS
-example: `/tickets/reserve_ticket/1,7,10`
+### /tickets/reserve_ticket
+method: `POST`
+parameters: `seat_ids``'
+example: `/tickets/reserve_ticket/`
 
 
-### /tickets/pay/RESERVATION_ID/AMOUNT/TOKEN/CURRENCY
+### /tickets/pay
+method: `POST`
+parameters: `reservation_id`, `amount`, `token`, `currency`
 example: `/tickets/pay/1/10/1/EUR`
-(this propably should be reworked)
 
 
 ###/tickets/reservations/RESERVATION_ID
+method: `GET`
 example: `/tickets/reservations/1`
 
 
 ### /tickets/statistics/STATISTICS_TYPE
+method: `GET`
 examples:
 `/tickets/statistics/reserved_tickets_per_event`
 
@@ -43,8 +50,6 @@ All endpoints return a JSON object for easy use with front-end.
 The format and details can be easily changed.
 
 Future improvements could include (but are not limited to):
-
 1. rate limiting
-2. using UUID instead of ID's
-3. more useful statistics (like histograms)
-4. more tests to ensure quality
+2. using UUID
+3. more statistics (like histograms)
