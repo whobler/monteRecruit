@@ -44,13 +44,13 @@ class AvailableTicketsView(APIView):
 
 
 class ReserveTicketView(APIView):
-    # This should be a POST method. It is a GET method only for proof of concept and convenience.
-    def get(self, request, seat_ids):
+    def post(self, request):
         """Endpoint for reserving ticket(s). Multiple tickets can be reserved at once."""
         new_reservation = Reservations()
         new_reservation.save()
+        seat_ids = request.data['seat_ids']
         for seat_id in seat_ids.split(','):
-            current_seat = Seats.objects.get(id=seat_id)
+            current_seat = Seats.objects.filter(id=seat_id).first()
             if not current_seat:
                 return JsonResponse({'error': NO_TICKET_FOUND_MESSAGE})
             if current_seat.reservation is None:
