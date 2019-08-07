@@ -1,6 +1,7 @@
 from django.http import JsonResponse
 from rest_framework.views import APIView
 
+from .serializers import EventsSerializer, ReservationsSerializer
 from .payment_adapter import PaymentGateway, CardError, PaymentError, CurrencyError
 from .models import Events, Seats, Reservations
 
@@ -19,11 +20,7 @@ class EventView(APIView):
         """Endpoint for getting more detailed information about a single event."""
         event = Events.objects.filter(pk=event_id).first()
         if event:
-            data = {
-                'event_id': event.id,
-                'event_name': event.name,
-                'date_time': event.datetime
-            }
+            data = EventsSerializer(event).data
         else:
             data = {'info': NO_EVENT_FOUND_MESSAGE}
         return JsonResponse(data)
@@ -103,12 +100,8 @@ class ReservationView(APIView):
         if reservation:
             reserved_seats = Seats.objects.filter(reservation=reservation)
             seat_ids = [seat.id for seat in reserved_seats]
-            data = {
-                'reservation_id': reservation.pk,
-                'reservation_time': reservation.reservation_time,
-                'is_payed': reservation.is_payed,
-                'reserved_seats': seat_ids,
-            }
+            data = ReservationsSerializer(reservation).data
+            data['reserved_seats'] = seat_ids
         else:
             data = {'errors': NO_RESERVATION_FOUND_MESSAGE}
         return JsonResponse(data)

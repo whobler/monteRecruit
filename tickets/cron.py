@@ -5,7 +5,7 @@ from django_cron import CronJobBase, Schedule
 from .models import Reservations
 
 
-class RemoveInvalidReservations(CronJobBase):
+class RemoveOutdatedReservations(CronJobBase):
     RUN_EVERY_MINS = 1  # runs every minute
 
     schedule = Schedule(run_every_mins=RUN_EVERY_MINS)

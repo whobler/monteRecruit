@@ -123,5 +123,5 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 CRON_CLASSES = [
-    "tickets.cron.RemoveInvalidReservations",
+    "tickets.cron.RemoveOutdatedReservations",
 ]
