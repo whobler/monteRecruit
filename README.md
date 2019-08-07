@@ -24,7 +24,7 @@ example: `/tickets/events/1/available_tickets`
 ### /tickets/reserve_ticket
 method: `POST`
 
-parameters: `seat_ids``'
+parameters: `seat_ids`
 
 example: `/tickets/reserve_ticket/`
 

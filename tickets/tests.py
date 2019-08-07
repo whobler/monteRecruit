@@ -7,7 +7,9 @@ from .views import (
     TICKET_ALREADY_RESERVED_MESSAGE,
     NO_TICKET_FOUND_MESSAGE,
     PAYMENT_SUCCESSFUL_MESSAGE,
-    RESERVATION_ALREADY_PAID_MESSAGE, NO_RESERVATION_FOUND_MESSAGE)
+    RESERVATION_ALREADY_PAID_MESSAGE,
+    NO_RESERVATION_FOUND_MESSAGE
+)
 from .models import Events, Reservations, Seats
 
 
@@ -221,3 +223,31 @@ class ReservationViewTest(APITestCase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
         self.assertEqual({'errors': NO_RESERVATION_FOUND_MESSAGE}, response.json())
+
+
+class StatisticsViewTest(APITestCase):
+
+    def setUp(self):
+        event1 = Events.objects.create(name=event_name, datetime=some_datetime)
+        event2 = Events.objects.create(name=event_name+'2', datetime=some_datetime)
+        reservation = Reservations.objects.create()
+        Seats.objects.create(event=event1, type=2)
+        Seats.objects.create(event=event2, type=3, reservation=reservation)
+
+    def test_reserved_tickets_per_event_ok(self):
+        """Check if endpoint returns a proper response."""
+        url = reverse('statistics_view', kwargs={'statistics_type': 'reserved_tickets_per_event'})
+        response = self.client.get(url)
+        expected_response = {event_name: 0, event_name+'2': 1}
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(expected_response, response.json())
+
+    def test_reserved_tickets_per_type_ok(self):
+        """Check if endpoint returns a proper response."""
+        url = reverse('statistics_view', kwargs={'statistics_type': 'reserved_tickets_by_type'})
+        response = self.client.get(url)
+        expected_response = {'Premium': 0, 'Regular': 0, 'VIP': 1}
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(expected_response, response.json())
