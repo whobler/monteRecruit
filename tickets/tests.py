@@ -22,7 +22,7 @@ class EventViewTest(APITestCase):
     def test_event_not_existing(self):
         """Check for behaviour when event does not exist."""
         url = reverse('event_view', kwargs={'event_id': 2})
-        response = self.client.get(url, {}, format='json')
+        response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
         self.assertEqual({'info': NO_EVENT_FOUND_MESSAGE}, response.json())
 
@@ -30,7 +30,7 @@ class EventViewTest(APITestCase):
         """Check if endpoint behaves properly with proper data."""
         event = Events.objects.get(id=1)
         url = reverse('event_view', kwargs={'event_id': 1})
-        response = self.client.get(url, {}, format='json')
+        response = self.client.get(url)
 
         self.assertEqual(response.status_code, 200)
         expected_response = {
@@ -50,7 +50,7 @@ class AvailableTicketsViewTest(APITestCase):
         event = Events.objects.get(id=1)
         Seats.objects.create(type=1, event=event)
         url = reverse('available_tickets_view', kwargs={'event_id': 1})
-        response = self.client.get(url, {}, format='json')
+        response = self.client.get(url)
 
         self.assertEqual(response.status_code, 200)
         expected_response = {'available_tickets': [{'ticket_id': 1, 'ticket_type': '1'}]}
@@ -59,7 +59,7 @@ class AvailableTicketsViewTest(APITestCase):
     def test_event_not_existing(self):
         """Check for behaviour when event does not exist."""
         url = reverse('available_tickets_view', kwargs={'event_id': 2})
-        response = self.client.get(url, {}, format='json')
+        response = self.client.get(url)
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual({'info': NO_EVENT_FOUND_MESSAGE}, response.json())
@@ -70,7 +70,7 @@ class AvailableTicketsViewTest(APITestCase):
         event = Events.objects.get(id=1)
         reservation = Reservations.objects.create()
         Seats.objects.create(type=1, event=event, reservation=reservation)
-        response = self.client.get(url, {}, format='json')
+        response = self.client.get(url)
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual({'info': NO_TICKETS_FOR_EVENT_MESSAGE}, response.json())
@@ -116,9 +116,8 @@ class PayViewTest(APITestCase):
     url = reverse('pay_view')
 
     def setUp(self):
-        event = Events.objects.create(name=event_name, datetime=some_datetime)
-        reservation = Reservations.objects.create()
-        Seats.objects.create(type=1, event=event, reservation=reservation)
+        Events.objects.create(name=event_name, datetime=some_datetime)
+        Reservations.objects.create()
 
     def test_ok(self):
         """Check if endpoint behaves properly with proper data."""
@@ -194,3 +193,31 @@ class PayViewTest(APITestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual({'errors': 'Something went wrong with your transaction'}, response.json())
 
+
+class ReservationViewTest(APITestCase):
+
+    def setUp(self):
+        event = Events.objects.create(name=event_name, datetime=some_datetime)
+        reservation = Reservations.objects.create()
+        Seats.objects.create(event=event, reservation=reservation)
+
+    def test_ok(self):
+        """Check if endpoint behaves properly with proper data."""
+        url = reverse('reservation_view', kwargs={'reservation_id': 1})
+        response = self.client.get(url)
+        reservation = Reservations.objects.get(id=1)
+        expected_response = {
+            'id': reservation.id,
+            'is_payed': reservation.is_payed,
+            'reservation_time': reservation.reservation_time.strftime("%Y-%m-%dT%H:%M:%S.%fZ"),
+            'reserved_seats': [1]
+        }
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(expected_response, response.json())
+
+    def test_not_existing_reservation(self):
+        """Check if endpoint returns proper response when reservation not existing."""
+        url = reverse('reservation_view', kwargs={'reservation_id': 665})
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual({'errors': NO_RESERVATION_FOUND_MESSAGE}, response.json())

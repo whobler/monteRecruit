@@ -11,33 +11,41 @@ Otherwise it can be run manually by `./manage.py runcrons` command
 available URL's to use:
 ### /tickets/events/EVENT_ID
 method: `GET`
+
 example: `/tickets/events/1`
 
 
 ### /tickets/events/EVENT_ID/available_tickets
 method: `GET`
+
 example: `/tickets/events/1/available_tickets`
 
 
 ### /tickets/reserve_ticket
 method: `POST`
+
 parameters: `seat_ids``'
+
 example: `/tickets/reserve_ticket/`
 
 
 ### /tickets/pay
 method: `POST`
+
 parameters: `reservation_id`, `amount`, `token`, `currency`
+
 example: `/tickets/pay/1/10/1/EUR`
 
 
-###/tickets/reservations/RESERVATION_ID
+### /tickets/reservations/RESERVATION_ID
 method: `GET`
+
 example: `/tickets/reservations/1`
 
 
 ### /tickets/statistics/STATISTICS_TYPE
 method: `GET`
+
 examples:
 `/tickets/statistics/reserved_tickets_per_event`
 
