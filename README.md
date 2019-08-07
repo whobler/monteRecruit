@@ -1,7 +1,7 @@
 # Wojciech Hobler recruitment task
 
 This project provides API endpoints for possible front-end use to a ticket-selling platform. 
-It is very simplified and should be only used to assess Python writing skills.
+It is very simplified and should not be used commercially.
 
 This project uses django-cron to periodically erase outdated Reservations.
 In order to make it work automatically a proper job should be added to crontab.
